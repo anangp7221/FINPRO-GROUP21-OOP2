@@ -1,7 +1,7 @@
 package com.finpro.frontend.command;
 
 import com.finpro.frontend.model.Career;
-import com.finpro.frontend.model.model.MatchStats;
+import com.finpro.frontend.model.MatchStats;
 import com.finpro.frontend.model.Player;
 import com.finpro.frontend.model.Stat;
 import java.util.Random;
