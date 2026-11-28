@@ -31,13 +31,28 @@ public class StoryManager implements GameEventListener {
     public void onEvent(GameEvent e) {
         if (current != null) return; // lagi ada scene aktif
         switch (e.type()) {
-            case FULL_TIME -> {
-                if (e.value() > 0) start(StoryBook.WIN_INTERVIEW);
-                else if (e.value() < 0) start(StoryBook.LOSS_LOCKER_ROOM);
+            case ROUND_INTRO -> {
+                switch (e.value()) {
+                    case 0 -> start(StoryBook.INTRO_QF);
+                    case 2 -> start(StoryBook.INTRO_SF);
+                    case 4 -> start(StoryBook.INTRO_FINAL);
+                    default -> { }
+                }
             }
             case HALF_TIME -> {
                 if (e.value() < 0) start(StoryBook.HALFTIME_TALK);
             }
+            case LEG_WON -> start(StoryBook.WIN_INTERVIEW);
+            case LEG_LOST -> start(StoryBook.LOSS_LOCKER_ROOM);
+            case TIE_WON -> {
+                switch (e.value()) {
+                    case 1 -> start(StoryBook.QF_ADVANCE);
+                    case 3 -> start(StoryBook.SF_ADVANCE);
+                    case 4 -> start(StoryBook.TROPHY);
+                    default -> { }
+                }
+            }
+            case TIE_LOST -> start(e.value() == 4 ? StoryBook.FINAL_LOST : StoryBook.ELIMINATED);
             default -> { }
         }
     }
@@ -46,11 +61,18 @@ public class StoryManager implements GameEventListener {
         StoryScene scene = book.get(sceneId);
         if (scene == null) return false;
         current = scene;
-        bus.publish(GameEventType.STORY_SCENE, scene.text(), 0);
+        bus.publish(GameEventType.STORY_SCENE, textOf(scene), 0);
         return true;
     }
 
     public boolean hasActiveScene() { return current != null; }
+
+    /** Teks scene dengan {nama} diganti nama pemain. */
+    public String textOf(StoryScene scene) {
+        return scene.text().replace("{nama}", career.getPlayer().getName());
+    }
+
+    public String currentText() { return current == null ? "" : textOf(current); }
 
     public StoryScene getCurrentScene() { return current; }
 
